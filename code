@@ -1,0 +1,121 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+netflix = pd.read_csv("/content/netflix_titles.csv")
+
+print(netflix.info())
+
+print(netflix.describe())
+
+# Count of missing values per column
+print(netflix.isnull().sum())
+
+# Fill missing values in categorical columns with 'Unknown'
+netflix['director'] = netflix['director'].fillna("Unknown")
+netflix['cast'] = netflix['cast'].fillna("Unknown")
+netflix['country'] = netflix['country'].fillna("Unknown")
+netflix['date_added'] = netflix['date_added'].fillna("Unknown")
+
+# Display first few rows of the cleaned data
+print(netflix.head())
+
+# Verify no missing values remain in these columns
+print(netflix.isnull().sum())
+
+netflix.dropna(inplace=True)
+netflix.isnull().sum()
+
+netflix.rating.value_counts()
+netflix.type.value_counts()
+netflix.type.value_counts().index
+netflix.type.unique
+
+#pie chart - The number of Movie content on Netflix is 2.33 times the TV Show content.
+plt.figure(figsize=(10, 8))
+
+plt.pie(netflix.type.value_counts(), labels = netflix.type.value_counts().index, labeldistance=None, autopct="%.1f",textprops={'fontsize': 14},colors=['lightskyblue', 'lightcoral'])
+plt.legend()
+plt.show()
+
+#director count or unknown
+netflix.director.value_counts()
+
+#Release Year
+last_ten_year=netflix[["type","release_year"]]
+last_ten_year=last_ten_year[last_ten_year["release_year"] >=2012]
+last_ten_year
+
+last_ten_year.groupby("release_year")["type"].value_counts()
+
+
+last_ten_year_df =last_ten_year.groupby("release_year")["type"].size().reset_index()
+last_ten_year_df = pd.DataFrame(last_ten_year_df)
+last_ten_year_df
+
+last_ten_year_df.rename(columns={"type" : "Total Content"},inplace=True)
+last_ten_year_df
+
+#plot graph 
+plt.figure(figsize=(10,8))
+sns.countplot(x="release_year", data=last_ten_year, hue="type", palette="viridis");
+
+
+
+plt.figure(figsize=(10,8))
+sns.countplot(x="release_year", data=last_ten_year, palette="viridis");
+
+
+
+plt.figure(figsize=(15, 8))
+ax = sns.lineplot(x="release_year",y="Total Content",data=last_ten_year_df, linewidth=2.5)
+ax.set(xlabel='Release Year', ylabel='Total Content', title='Trend of Content Produced over Ten Years on Netflix')
+plt.show()
+print("Result : When the last ten years are examined, it is seen that the most popular year of Netflix content is 2018. After 2018, the popularity of netflix content is decreasing.")
+
+print("---------------------------------------------------------------------")
+
+#RATING
+netflix.rating.unique()
+new_categories = {
+    'TV-PG': 'Parental Guidance',
+    'TV-MA': 'Mature Audience',
+    'TV-Y7-FV': 'Teens',
+    'TV-Y7': 'Teens',
+    'TV-14': 'Teens',
+    'R': 'Mature Audience',
+    'TV-Y': 'General Audience',
+    'NR': 'Mature Audience',
+    'PG-13': 'Teens',
+    'TV-G': 'General Audience',
+    'PG': 'Teens',
+    'G': 'General Audience',
+    'UR': 'Mature Audience',
+    'NC-17': 'Mature Audience'
+}
+netflix["rating"] = netflix['rating'].replace(new_categories)
+netflix.head()
+
+plt.figure(figsize=(12,8))
+sns.countplot(x="rating",data=netflix,palette="viridis")
+plt.title("Count of Rating by Movie and Shows");
+
+print("It has been observed that Netflix has the most content for Mature Audience.")
+print("-------------------------------------------------------------------")
+
+
+#Countries
+
+Top_15_Country=netflix.country.value_counts().head(15)
+Top_15_Country = pd.DataFrame(Top_15_Country)
+Top_15_Country
+
+plt.figure(figsize=(15,8))
+
+ax=sns.barplot(x=netflix.country.value_counts()[:15].index , y=netflix.country.value_counts()[:15].values )
+ax.set_xticklabels(netflix.country.value_counts()[:15].index,rotation=45)
+for i in ax.containers:
+    ax.bar_label(i);
+
+print("While the most content is produced in the USA, India follows in the second country.")
